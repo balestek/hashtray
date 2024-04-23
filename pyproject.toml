@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.24.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hashtray"
+dynamic = [
+  "version"
+]
+description = "hashtray is an OSINT tool for Gravatar. Find Gravatar account from an email and find an email from a Gravatar account."
+authors = [
+  { name = "balestek"},
+]
+license = { file = "LICENSE" }
+readme = "README.md"
+keywords = ["osint", "osint-tools", "osint-python", "open-source-intelligence", "information-gathering", "osint-tool", "investigation", "gravatar", "osint-gravatar", "email", "hash", "md5", "md5-hash", "python", "pypi", "pipenv", "pipx"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+    "Environment :: Console"
+]
+requires-python = ">=3.8"
+dependencies = [
+    "httpx",
+    "unidecode",
+    "tqdm",
+    "rich"
+]
+
+[tool.hatch.version]
+path = "hashtray/__about__.py"
+
+[project.scripts]
+hashtray  = "hashtray.cli:main"
+
+[project.urls]
+"Homepage" = "https://github.com/balestek/hashtray"
+"Bug Tracker" = "https://github.com/balestek/hashtray/issues"
