@@ -90,7 +90,7 @@ def main() -> None:
         "    [orange3]--domains, -d[/orange3]      [tan]domain1.com domain2.com,...[/tan]\n"
         "                       Use your custom email domains for emails generation\n"
         "    [orange3]--crazy, -c[/orange3]        Go crazy and try EVERY SINGLE combination\n"
-        "                       (with any special character at any place inthe combinations)\n"
+        "                       (with any special character at any place in the combinations)\n"
         "                       Half as fast per sec., gazillion combinations but exhaustive\n"
     )
 
