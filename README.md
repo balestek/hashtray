@@ -4,6 +4,12 @@
   <img src="https://raw.githubusercontent.com/balestek/hashtray/master/media/hashtray.png">
 </p>
 
+[![PyPI version](https://badge.fury.io/py/hashtray.svg)](https://badge.fury.io/py/hashtray)
+![Python minimum version](https://img.shields.io/badge/Python-3.8%2B-brightgreen)
+[![Downloads](https://pepy.tech/badge/hashtray)](https://pepy.tech/project/hashtray)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License](https://img.shields.io/github/license/balestek/medor.svg)](https://github.com/<balestek>/medor/blob/master/LICENSE)
+
 ## Intro
 _hashtray_ is an OSINT (Open Source Intelligence) tool designed to find a Gravatar account associated with an email address and to locate an email address using a Gravatar account username or hash. A Gravatar account can provide substantial information for pivoting purposes.
 
