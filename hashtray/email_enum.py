@@ -22,7 +22,8 @@ class EmailEnum:
         custom_domains: list = None,
         crazy: bool = False,
     ):
-        self.account_hash = self.hashed = account_hash
+        self.account_hash = account_hash
+        self.hashed = None
         self.separators = ["", ".", "_", "-"]
         self.name_pattern = "[-_ ./]"
         self.emails = []
@@ -42,7 +43,7 @@ class EmailEnum:
         self.n_combs = 0
         self.c = c(highlight=False)
 
-    def load_domains(self):
+    def load_domains(self) -> json:
         # Load domains from json files
         domain_files = {None: "", "common": "", "long": "_long", "full": "_full"}
         domain_file = domain_files[self.domain_list]
@@ -65,13 +66,14 @@ class EmailEnum:
             )
             sys.exit(1)
         # Get elements with custom arguments or from the Gravatar profile
+        self.hashed = self.g.info()["hash"]
         if self.elements:
             elements = self.get_custom_elements()
         else:
             elements = self.get_elements_from_gravatar()
         return elements
 
-    def get_custom_elements(self):
+    def get_custom_elements(self) -> list:
         # Get elements from custom arguments
         self.elements = [
             unidecode(element.lower())
@@ -85,19 +87,18 @@ class EmailEnum:
             )
         return elements
 
-    def get_elements_from_gravatar(self):
+    def get_elements_from_gravatar(self) -> list:
         # Get elements from the Gravatar profile
         elements = []
         infos = self.g.info()
         self.get_public_emails(infos)
-        self.hashed = infos["hash"]
         gob = self.process_gravatar_info(infos)
         for element in gob:
             deco = unidecode(element.lower())
             elements.append(deco) if deco not in elements else None
         return elements
 
-    def get_public_emails(self, infos):
+    def get_public_emails(self, infos: dict) -> None:
         # Get emails from the Gravatar json emails
         if infos["emails"]:
             self.public_emails.extend(
@@ -110,7 +111,7 @@ class EmailEnum:
         find = re.findall(pattern, infos["aboutMe"]) if infos["aboutMe"] else None
         self.public_emails.extend(find) if find else None
 
-    def process_gravatar_info(self, infos):
+    def process_gravatar_info(self, infos: dict) -> list:
         # Process Gravatar infos to get additional chunks
         gob = []
         self.add_preferred_username(infos, gob)
@@ -122,15 +123,15 @@ class EmailEnum:
         self.add_elements(gob)
         return gob
 
-    def add_preferred_username(self, infos, gob):
+    def add_preferred_username(self, infos: dict, gob: list) -> None:
         if infos["preferredUsername"]:
             gob.append(infos["preferredUsername"])
 
-    def add_profile_url(self, infos, gob):
+    def add_profile_url(self, infos: dict, gob: list) -> None:
         if infos["profileUrl"]:
             gob.append(self.last_url_chunk(infos["profileUrl"]))
 
-    def add_chunks(self, string, gob):
+    def add_chunks(self, string: str, gob: list) -> None:
         if string:
             names = re.split(self.name_pattern, unidecode(string))
             chunks = [name for name in names if name]
@@ -138,28 +139,28 @@ class EmailEnum:
             chunks.extend(name[:1] for name in names if len(name) > 1)
             gob.extend(chunks)
 
-    def add_display_name(self, infos, gob):
+    def add_display_name(self, infos: dict, gob: list) -> None:
         names = re.split(self.name_pattern, unidecode(infos["displayName"]))
         gob.extend(name for name in names if name)
 
-    def add_given_name(self, infos, gob):
+    def add_given_name(self, infos: dict, gob: list) -> None:
         # Add given name and first letter chunks
         if infos["name"] and infos["name"]["givenName"]:
             self.add_chunks(infos["name"]["givenName"], gob)
 
-    def add_family_name(self, infos, gob):
+    def add_family_name(self, infos: dict, gob: list) -> None:
         # Add family name and first letter chunks
         if infos["name"] and infos["name"]["familyName"]:
             self.add_chunks(infos["name"]["familyName"], gob)
 
-    def add_accounts(self, infos, gob):
+    def add_accounts(self, infos: dict, gob: list) -> None:
         # Add account chunks for verified accounts
         if infos["accounts"]:
             for account in infos["accounts"]:
                 account_url = infos["accounts"][account].rstrip("/")
                 self.process_account(account, account_url, gob)
 
-    def process_account(self, account, account_url, gob):
+    def process_account(self, account: str, account_url: str, gob: list) -> None:
         # Verified accounts username chunks
         if account in ["Mastodon", "Fediverse"]:
             gob.append(self.last_url_chunk(account_url).replace("@", ""))
@@ -200,7 +201,7 @@ class EmailEnum:
             chunk = self.last_url_chunk(account_url)
             gob.append(chunk)
 
-    def add_elements(self, gob):
+    def add_elements(self, gob: list) -> None:
         # Building final list of chunks, deduped , lowercase and unidecoded if it hasn't been yet
         self.elements = []
         self.elements = [
@@ -209,15 +210,15 @@ class EmailEnum:
             if unidecode(element.lower()) not in self.elements
         ]
 
-    def hash_email(self, email):
+    def hash_email(self, email: str) -> str:
         # MD5 hashing of a string email
         return hashlib.md5(email.lower().encode()).hexdigest()
 
-    def check_mailhash(self, s: str):
+    def check_mailhash(self, s: str) -> bool:
         # Check if a string is a valid MD5 hash
         return re.fullmatch(r"[a-fA-F0-9]{32}", s) is not None
 
-    def check_email(self, email):
+    def check_email(self, email: str) -> bool:
         # Check if a string is a valid email
         return (
             True
@@ -225,11 +226,11 @@ class EmailEnum:
             else False
         )
 
-    def last_url_chunk(self, s: str):
+    def last_url_chunk(self, s: str) -> str:
         # Get the last chunk of an URL
         return s.split("/")[-1]
 
-    def is_combination(self, s, chunks):
+    def is_combination(self, s: str, chunks: list) -> bool:
         # Logic to check if a string is a combination of other strings
         if s in chunks:
             chunks.remove(s)
@@ -244,18 +245,18 @@ class EmailEnum:
                 return True
         return False
 
-    def dedup_chunks(self, chunks):
+    def dedup_chunks(self, chunks: list) -> list:
         # Remove chunks from a list of chunks if it's made with other strings of the list
         return [s for s in chunks if not self.is_combination(s, chunks.copy())]
 
-    def show_chunks(self, elements):
+    def show_chunks(self, elements: list) -> str:
         # Show chunks as a string
         em = ""
         for element in elements:
             em += element + ", "
         return em.rstrip(", ")
 
-    def get_combination_count(self, n):
+    def get_combination_count(self, n: int) -> int:
         # Calculate the total number of combinations for tdqm bar progress
         total = 0
         for r in range(1, n + 1):
@@ -279,7 +280,7 @@ class EmailEnum:
         # Multiply by the number of domains
         return total * len(self.domains)
 
-    def combinator(self):
+    def combinator(self) -> str:
         # Generate all possible email combinations for unique elements
         # Get chunks and dedup them if made with other chunks
         elements = self.dedup_chunks(self.create_elements())
@@ -323,7 +324,7 @@ class EmailEnum:
                                 email_local_part = separator.join(permutation)
                                 yield f"{email_local_part}@{domain}"
 
-    def hashes(self):
+    def hashes(self) -> str:
         # Calculate emails hash
         for email in self.combinator():
             hashd = self.hash_email(email)
@@ -337,7 +338,7 @@ class EmailEnum:
                 return email
         self.bar.close()
 
-    def find(self):
+    def find(self) -> None:
         # Print process and results
         self.c.print(
             f"[turquoise2]Finding email for [bold]{self.account_hash}[/bold][/turquoise2]\n"
@@ -382,5 +383,8 @@ class EmailEnum:
             "\n[light_pink1]:question_mark:  Do you want to display the profile info? (y/n):[/light_pink1]"
         )
         if show_profile.lower() == "y":
+            print(
+                f"------------------------------------------------------------------------------------\n"
+            )
             self.g.print_info()
         exit(0)

@@ -1,7 +1,7 @@
 # hashtray
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/balestek/hashtray/master/media/hashtray.png">
+  <img src="https://raw.githubusercontent.com/balestek/hashtray/master/media/hashtray-logo.png">
 </p>
 
 [![PyPI version](https://badge.fury.io/py/hashtray.svg)](https://badge.fury.io/py/hashtray)
@@ -67,6 +67,10 @@ pip install hashtray
 
 ### Find Gravatar account with an email
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/balestek/hashtray/master/media/hashtray-email.png">
+</p>
+
 Pretty straightforward. The command is `email` .
 
 It converts the email address into its MD5 hash. _hashtray_ then checks if a public profile associated with the hash exists on Gravatar. If found, it displays the profile information.
@@ -80,6 +84,10 @@ In some cases, the email hash may not match the one found on the Gravatar profil
 In such cases, _hashtray_ alerts you. You can then attempt to find the primary email address using its second command, `account`.
 
 ### Find an email from a Gravatar username or hash
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/balestek/hashtray/master/media/hashtray-account.png">
+</p>
 
 To find an email address associated with a Gravatar username or hash, use the account command.
 

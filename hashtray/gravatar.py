@@ -74,7 +74,7 @@ class Gravatar:
             highlight=False, theme=Theme({"repr.url": "not underline bold white"})
         )
 
-    def check_email(self):
+    def check_email(self) -> bool:
         # Check if email is valid
         if re.match(r"(^[a-zA-Z0-9_.%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", self.email):
             return True
@@ -82,7 +82,7 @@ class Gravatar:
             self.c.print(f"[red]Invalid email address: {self.email}.[/red]")
             exit(0)
 
-    def get_json(self):
+    def get_json(self) -> dict:
         # Get Gravatar json data
         try:
             res = httpx.get(self.account_url + ".json")
@@ -91,7 +91,7 @@ class Gravatar:
         except Exception as e:
             print(e)
 
-    def process_list(self, info, data):
+    def process_list(self, info: list, data: dict) -> dict:
         # Build a dictionary with the json data
         info_dict = {}
         for i, item in enumerate(data[info]):
@@ -113,7 +113,7 @@ class Gravatar:
                     info_dict[key] = item[key]
         return info_dict
 
-    def info(self):
+    def info(self) -> dict:
         # Get the Gravatar info if it's a list or not
         try:
             data = self.get_json()["entry"][0]
@@ -134,11 +134,12 @@ class Gravatar:
                     self.infos[info] = data[info]
         return self.infos
 
-    def print_info(self):
+    def print_info(self) -> None:
         # Print the Gravatar profile infos
         data = self.info()
         if self.email:
             self.c.print(
+                f"------------------------------------------------------------------------------------\n"
                 f"Gravatar info for    [bold white]{self.email}[/bold white]:\n"
             )
         for info in data:

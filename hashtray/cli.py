@@ -3,6 +3,7 @@ import sys
 
 from rich.console import Console
 
+from hashtray.__about__ import __version__ as version
 from hashtray.email_enum import EmailEnum
 from hashtray.gravatar import Gravatar
 
@@ -61,20 +62,19 @@ def parse_app_args(arguments=None):
 
 def main() -> None:
     c.print(
-        r"""
-██╗░░██╗░█████╗░░██████╗██╗░░██╗████████╗██████╗░░█████╗░██╗░░░██╗
-██║░░██║██╔══██╗██╔════╝██║░░██║╚══██╔══╝██╔══██╗██╔══██╗╚██╗░██╔╝
-███████║███████║╚█████╗░███████║░░░██║░░░██████╔╝███████║░╚████╔╝░
-██╔══██║██╔══██║░╚═══██╗██╔══██║░░░██║░░░██╔══██╗██╔══██║░░╚██╔╝░░
-██║░░██║██║░░██║██████╔╝██║░░██║░░░██║░░░██║░░██║██║░░██║░░░██║░░░
-╚═╝░░╚═╝╚═╝░░╚═╝╚═════╝░╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░
-                                             [white]j m . b a l e s t e k[/white]
+        f"""[bold]
+[turquoise2]⠀⠀⣠⣴⣶⠿⠿⣷⣶⣄⠀⠀⠀[/turquoise2]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+[turquoise2]⠀⢾⠟⠉⠀⠀⠀⠀⠈⠁⠀⠀⠀⠀[/turquoise2]⣤⡄⠀⣤⠀⠀⣤⣄⠀⢀⣤⠤⠤⠀⣤⠀⢠⡄⠤⢤⣤⠤⢠⣤⠤⣤⠀⠀⣠⣤⠀⠠⣤⠀⢠⡄
+[turquoise2]⠀⠀⠀⠀⠀⠀⣶⣶⣶⣶⣶⣶⠂⠀[/turquoise2]⣿⣇⣀⣿⠀⢰⡟⢿⡀⠸⣧⣀⠀⠀⣿⣀⣸⡇⠀⢸⡇⠀⢸⡇⠀⣹⡇⢀⣿⢻⡇⠀⢹⣦⡿⠁
+[turquoise2]⣀⣀⠀⠀⠀⠀⠋⠃⠀⠀⢸⣿⠀⠀[/turquoise2]⣿⡏⠉⣿⠀⣾⠧⢾⣇⠀⠈⠙⣿⠀⣿⠉⢹⡇⠀⢸⡇⠀⢸⡿⢺⣟⠀⣸⡷⠼⣿⠀⠀⣿⠃⠀
+[turquoise2]⠘⢿⣦⣀⠀⠀⠀⠀⢀⣴⣿⠋⠀⠀[/turquoise2]⠛⠃⠀⠛⠐⠛⠀⠀⠛⠐⠶⠶⠛⠀⠛⠀⠘⠃⠀⠘⠃⠀⠘⠓⠀⠛⠂⠛⠀⠀⠙⠃⠀⠛⠀⠀
+[turquoise2]⠀⠀⠙⠻⠿⣶⣶⡿⠿⠋⠁   [/turquoise2][/bold]jm  balestek⠀v{version}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀       ⠀⠀⠀⠀⠀⠀
  """,
-        style="#1e8cbe",
     )
     c.print(
         "[bold turquoise2]Gravatar Account and Email Finder[/bold turquoise2]\n"
-        "Find a Gravatar account from an email address or find an email address from a Gravatar account or hash.\n"
+        "Find a Gravatar account from an email address or\n"
+        "find an email address from a Gravatar account or hash.\n"
         "\n"
         ":arrow_forward: [bold turquoise2]Find a gravatar account from en email:[/bold turquoise2]\n"
         "  [bright_white]Usage:[/bright_white] [gold1]hashtray[/gold1] [orange_red1]email[/orange_red1] email@example.com\n"
@@ -85,9 +85,9 @@ def main() -> None:
         "  [bright_white]Options:[/bright_white]\n"
         "    [orange3]--domain_list, -l[/orange3]  [tan]common|long|full[/tan]\n"
         "                       Domain list to use for email enumeration. Default: common\n"
-        "    [orange3]--elements, -e[/orange3]     [tan]element1 element2,...[/tan]\n"
+        "    [orange3]--elements, -e[/orange3]     [tan]element1 element2 ...[/tan]\n"
         "                       Generate combinations with your elements/strings instead\n"
-        "    [orange3]--domains, -d[/orange3]      [tan]domain1.com domain2.com,...[/tan]\n"
+        "    [orange3]--domains, -d[/orange3]      [tan]domain1.com domain2.com ...[/tan]\n"
         "                       Use your custom email domains for emails generation\n"
         "    [orange3]--crazy, -c[/orange3]        Go crazy and try EVERY SINGLE combination\n"
         "                       (with any special character at any place in the combinations)\n"
