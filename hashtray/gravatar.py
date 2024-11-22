@@ -82,14 +82,30 @@ class Gravatar:
             self.c.print(f"[red]Invalid email address: {self.email}.[/red]")
             exit(0)
 
+    def is_exists(self) -> bool:
+        # Get Gravatar json data
+        try:
+            res = httpx.get(self.account_url + ".json")
+            res.raise_for_status() ## Raise an exception for non-200 status codes
+            return True
+        except Exception as e:
+            return False
+
     def get_json(self) -> dict:
         # Get Gravatar json data
         try:
             res = httpx.get(self.account_url + ".json")
-            if res.status_code == 200:
-                return res.json()
+            res.raise_for_status() ## Raise an exception for non-200 status codes
+            return res.json()
+        except httpx.HTTPError as e:
+            if e.response.status_code == 404:
+                self.c.print(f"[red]Profile not found (404 error)[/red]")
+            else:
+                self.c.print(f"[red]HTTP error occurred: {e}[/red]")
         except Exception as e:
-            print(e)
+            self.c.print(f"[red]An error occurred: {e}[/red]")
+
+        return {}
 
     def process_list(self, info: list, data: dict) -> dict:
         # Build a dictionary with the json data
@@ -115,6 +131,7 @@ class Gravatar:
 
     def info(self) -> dict:
         # Get the Gravatar info if it's a list or not
+        data = {}
         try:
             data = self.get_json()["entry"][0]
         except:

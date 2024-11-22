@@ -42,6 +42,8 @@ class EmailEnum:
         self.elapsed = 0
         self.n_combs = 0
         self.c = c(highlight=False)
+        self.is_exists = True  # in case of removed gravatar profile
+        self.info = {}
 
     def load_domains(self) -> json:
         # Load domains from json files
@@ -59,18 +61,27 @@ class EmailEnum:
             self.g = Gravatar(ghash=self.account_hash)
         else:
             self.g = Gravatar(account=self.account_hash)
-        if not self.g.get_json():
+
+        self.is_exists = self.g.is_exists()
+        if not self.is_exists:
             self.bar.close()
             self.c.print(
-                f"Account {self.account_hash} not found on Gravatar.com\n", style="red"
+                f"Account {self.account_hash} not found on Gravatar.com\n"
+                "If case you still want to find an email address, use the --elements option\n", style="yellow"
             )
-            sys.exit(1)
-        # Get elements with custom arguments or from the Gravatar profile
-        self.hashed = self.g.info()["hash"]
+            # don't exit in case of removed gravatar profile
+            self.hashed = self.account_hash
+        else:
+            # Get elements with custom arguments or from the Gravatar profile
+            self.hashed = self.g.info().get("hash", self.account_hash)
+
         if self.elements:
             elements = self.get_custom_elements()
         else:
-            elements = self.get_elements_from_gravatar()
+            if not self.is_exists:
+                elements = []
+            else:
+                elements = self.get_elements_from_gravatar()
         return elements
 
     def get_custom_elements(self) -> list:
@@ -379,12 +390,13 @@ class EmailEnum:
                             f"\t [bold]:email:  [turquoise2]{email}[/turquoise2][/bold]"
                         )
 
-        show_profile = self.c.input(
-            "\n[light_pink1]:question_mark:  Do you want to display the profile info? (y/n):[/light_pink1]"
-        )
-        if show_profile.lower() == "y":
-            print(
-                f"------------------------------------------------------------------------------------\n"
+        if self.is_exists:
+            show_profile = self.c.input(
+                "\n[light_pink1]:question_mark:  Do you want to display the profile info? (y/n):[/light_pink1]"
             )
-            self.g.print_info()
+            if show_profile.lower() == "y":
+                self.c.print(
+                    f"------------------------------------------------------------------------------------\n"
+                )
+                self.g.print_info()
         exit(0)
