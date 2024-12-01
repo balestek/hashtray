@@ -5,10 +5,12 @@ import re
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
+import tldextract
 
 import tqdm
 from rich.console import Console as c
 from unidecode import unidecode
+from icecream import ic
 
 from hashtray.gravatar import Gravatar
 
@@ -62,7 +64,7 @@ class EmailEnum:
         else:
             self.g = Gravatar(account=self.account_hash)
 
-        self.is_exists = self.g.is_exists()
+        self.is_exists = self.g.is_exists
         if not self.is_exists:
             self.bar.close()
             self.c.print(
@@ -111,15 +113,15 @@ class EmailEnum:
 
     def get_public_emails(self, infos: dict) -> None:
         # Get emails from the Gravatar json emails
-        if infos["emails"]:
-            self.public_emails.extend(
-                infos["emails"][email]
-                for email in infos["emails"]
-                if self.check_email(infos["emails"][email])
+        if infos["Emails"]:
+            self.public_emails.append(
+                infos["Emails"]
+                for email in infos["Emails"]
             )
+
         # Get emails from the Gravatar json aboutMe bio
         pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-        find = re.findall(pattern, infos["aboutMe"]) if infos["aboutMe"] else None
+        find = re.findall(pattern, infos["About me"]) if infos["About me"] else None
         self.public_emails.extend(find) if find else None
 
     def process_gravatar_info(self, infos: dict) -> list:
@@ -128,19 +130,17 @@ class EmailEnum:
         self.add_preferred_username(infos, gob)
         self.add_profile_url(infos, gob)
         self.add_display_name(infos, gob)
-        self.add_given_name(infos, gob)
-        self.add_family_name(infos, gob)
         self.add_accounts(infos, gob)
         self.add_elements(gob)
         return gob
 
     def add_preferred_username(self, infos: dict, gob: list) -> None:
-        if infos["preferredUsername"]:
-            gob.append(infos["preferredUsername"])
+        if infos["Preferred username"]:
+            gob.append(infos["Preferred username"])
 
     def add_profile_url(self, infos: dict, gob: list) -> None:
-        if infos["profileUrl"]:
-            gob.append(self.last_url_chunk(infos["profileUrl"]))
+        if infos["Profile URL"]:
+            gob.append(self.last_url_chunk(infos["Profile URL"]))
 
     def add_chunks(self, string: str, gob: list) -> None:
         if string:
@@ -151,29 +151,20 @@ class EmailEnum:
             gob.extend(chunks)
 
     def add_display_name(self, infos: dict, gob: list) -> None:
-        names = re.split(self.name_pattern, unidecode(infos["displayName"]))
+        names = re.split(self.name_pattern, unidecode(infos["Display name"]))
         gob.extend(name for name in names if name)
-
-    def add_given_name(self, infos: dict, gob: list) -> None:
-        # Add given name and first letter chunks
-        if infos["name"] and infos["name"]["givenName"]:
-            self.add_chunks(infos["name"]["givenName"], gob)
-
-    def add_family_name(self, infos: dict, gob: list) -> None:
-        # Add family name and first letter chunks
-        if infos["name"] and infos["name"]["familyName"]:
-            self.add_chunks(infos["name"]["familyName"], gob)
 
     def add_accounts(self, infos: dict, gob: list) -> None:
         # Add account chunks for verified accounts
-        if infos["accounts"]:
-            for account in infos["accounts"]:
-                account_url = infos["accounts"][account].rstrip("/")
-                self.process_account(account, account_url, gob)
+        if infos["Verified accounts"]:
+            ic(infos["Verified accounts"])
+            for account in infos["Verified accounts"]:
+                account_url = account["url"].rstrip("/")
+                self.process_account(account["account"], account_url, gob)
 
     def process_account(self, account: str, account_url: str, gob: list) -> None:
         # Verified accounts username chunks
-        if account in ["Mastodon", "Fediverse"]:
+        if account in ["Mastodon", "Fediverse", "TikTok"]:
             gob.append(self.last_url_chunk(account_url).replace("@", ""))
         elif account in ["LinkedIn", "YouTube"]:
             (
@@ -182,7 +173,18 @@ class EmailEnum:
                 else None
             )
         elif account == "Tumblr":
-            gob.append(urlparse(account_url).netloc.split(".")[0])
+            extracted = tldextract.extract(account_url)
+            if extracted.subdomain:
+                gob.append(extracted.subdomain)
+            else:
+                gob.append(account_url.split("/")[-1])
+        elif account == "Bluesky":
+            handle = account_url.split("/")[-1]
+            match = re.match(r"([a-zA-Z0-9._-]+)\.bsky\.social", handle)
+            if match:
+                gob.append(match.group(1))
+            else:
+                gob.append(handle.split(".")[0])
         elif account in ["Facebook", "Instagram"]:
             if "profile.php" not in account_url:
                 gob.extend(
@@ -197,12 +199,16 @@ class EmailEnum:
                 )
         elif account == "Twitter":
             gob.extend(chunk for chunk in self.last_url_chunk(account_url).split("_"))
+        elif account == "TripIt":
+            if "/people/" in account_url:
+                gob.extend(
+                    chunk for chunk in self.last_url_chunk(account_url).split(".")
+                )
         elif account == "Goodreads":
             gob.extend(
                 chunk for chunk in self.last_url_chunk(account_url).split("-")[1:]
             )
         elif account not in [
-            "TikTok",
             "Foursquare",
             "WordPress",
             "Yahoo",
