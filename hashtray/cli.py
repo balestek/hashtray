@@ -1,11 +1,12 @@
 import argparse
+import asyncio
 import sys
 
 from rich.console import Console
 
 from hashtray.__about__ import __version__ as version
-from hashtray.email_enum import EmailEnum
-from hashtray.gravatar import Gravatar
+from hashtray.enumerator import Enumerator
+from hashtray.get_gravatar import Gravatar
 
 c = Console(highlight=False)
 
@@ -22,7 +23,7 @@ def parse_app_args(arguments=None):
     )
 
     subp_account = subparsers.add_parser(
-        "account", help="Find an email address from a Gravatar username or hash"
+        "account", help="Find an email address from a Gravatar username or hash (MD5/SHA256)"
     )
     subp_account.add_argument(
         "account",
@@ -73,38 +74,43 @@ def main() -> None:
     )
     c.print(
         "[bold turquoise2]Gravatar Account and Email Finder[/bold turquoise2]\n"
-        "Find a Gravatar account from an email address or\n"
-        "find an email address from a Gravatar account or hash.\n"
-        "\n"
+        "1) Find a Gravatar account from an email address.\n"
+        "2) Find an email address from a Gravatar account or hash.\n\n"
+
         ":arrow_forward: [bold turquoise2]Find a gravatar account from en email:[/bold turquoise2]\n"
-        "  [bright_white]Usage:[/bright_white] [gold1]hashtray[/gold1] [orange_red1]email[/orange_red1] email@example.com\n"
-        "\n"
+        "  [bright_white]Usage:[/bright_white] [gold1]hashtray[/gold1] [orange_red1]email[/orange_red1] email@example.com\n\n"
+
         ":arrow_forward: [bold turquoise2]Find a gravatar email from a gravatar username or hash:[/bold turquoise2]\n"
         "  [bright_white]Usage:[/bright_white] [gold1]hashtray[/gold1] [orange_red1]account[/orange_red1] username\n"
         "         [gold1]hashtray[/gold1] [orange_red1]account[/orange_red1] cc8c5b31041fcfd256ff6884ea7b28fb\n"
+
         "  [bright_white]Options:[/bright_white]\n"
         "    [orange3]--domain_list, -l[/orange3]  [tan]common|long|full[/tan]\n"
         "                       Domain list to use for email enumeration. Default: common\n"
         "    [orange3]--elements, -e[/orange3]     [tan]element1 element2 ...[/tan]\n"
-        "                       Generate combinations with your elements/strings instead\n"
+        "                       Generate combinations with your elements/strings instead of\n"
+        "                       the ones found on the Gravatar profile.\n"
         "    [orange3]--domains, -d[/orange3]      [tan]domain1.com domain2.com ...[/tan]\n"
         "                       Use your custom email domains for emails generation\n"
         "    [orange3]--crazy, -c[/orange3]        Go crazy and try EVERY SINGLE combination\n"
         "                       (with any special character at any place in the combinations)\n"
-        "                       Half as fast per sec., gazillion combinations but exhaustive\n"
+        "                       Half as fast per sec., gazillion combinations but exhaustive\n\n"
+        "  [deep_sky_blue1]hashtray creates a list of possible email addresses using data from the Gravatar profile.\n"
+        "  It compares each of these email hashes to the account hash to locate the primary Gravatar account email.[/deep_sky_blue1]\n"
+        "  Additionally, it also checks emails in the public profile to see if they are the primary email.\n"
     )
 
     args = parse_app_args()
     if args.cmd == "email" and args.email:
-        Gravatar(args.email).print_info()
+        asyncio.run(Gravatar(args.email).show_gravatar_infos())
     elif args.cmd == "account" and args.account:
-        EmailEnum(
+        asyncio.run(Enumerator(
             args.account,
             domain_list=args.domain_list,
             strings=args.elements,
             custom_domains=args.domains,
             crazy=args.crazy,
-        ).find()
+        ).collect_elements())
     else:
         exit("[red]Invalid command.[/red]")
 
