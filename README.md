@@ -17,7 +17,7 @@ _hashtray_ is an OSINT (Open Source Intelligence) tool designed to find a Gravat
 - v 0.1.0
   - sha256 hash support
   - Scrap the details no longer available due to the new Gravatar API
-  - Simplify some the data keys
+  - Simplify some data keys
   - Add domains found in the links sections to the domains list
   - Add Bluesky support and fix some website handling
   - Refactor some code
