@@ -208,7 +208,7 @@ class Gravatar:
                 exit("\n")
 
         # Build the table
-        table = Table(title=f"[b turquoise2]{data["Preferred username"]}[/b turquoise2]", show_header=False, show_lines=True)
+        table = Table(title=f"[b turquoise2]{data['Preferred username']}[/b turquoise2]", show_header=False, show_lines=True)
         table.add_column("", justify="right", style="turquoise2")
         table.add_column("", style="bold bright_white")
 
