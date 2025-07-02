@@ -34,7 +34,8 @@ dependencies = [
     "unidecode",
     "tqdm",
     "rich",
-    "tldextract"
+    "tldextract",
+    "scrapling"
 ]
 
 [tool.hatch.version]
