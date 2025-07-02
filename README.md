@@ -242,6 +242,7 @@ httpx
 unidecode
 tqdm
 rich
+scrapling
 ```
 
 ## License
