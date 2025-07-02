@@ -14,7 +14,7 @@
 _hashtray_ is an OSINT (Open Source Intelligence) tool designed to find a Gravatar account associated with an email address and to locate an email address using a Gravatar account username or hash. A Gravatar account can provide substantial information for pivoting purposes.
 
 ## Versions
-- v 0.1.0
+- v 0.1.0b0
   - sha256 hash support
   - Scrap the details no longer available due to the new Gravatar API
   - Simplify some the data keys
