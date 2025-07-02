@@ -13,6 +13,17 @@
 ## Intro
 _hashtray_ is an OSINT (Open Source Intelligence) tool designed to find a Gravatar account associated with an email address and to locate an email address using a Gravatar account username or hash. A Gravatar account can provide substantial information for pivoting purposes.
 
+## Versions
+- v 0.1.0
+  - sha256 hash support
+  - Scrap the details no longer available due to the new Gravatar API
+  - Simplify some the data keys
+  - Add domains found in the links sections to the domains list
+  - Add Bluesky support and fix some website handling
+  - Refactor some code
+- v 0.0.1.
+  - First release of _hashtray_.
+
 ## Features
 _hashtray_ comes with the following features:
 + [X] Find a Gravatar account using an email address 
@@ -49,13 +60,32 @@ If the profile is public and the information available, the following can be ret
 Python 3.8+ is required.
 
 ### pipx (recommended)
+
+Install with pipx
+
 ```bash
 pipx install hashtray
 ```
 
-### pipenv
+Run hashtray with pipx without installing it
+
 ```bash
-pipenv install hashtray
+pipx run hashtray [argumens]
+```
+
+### uv (recommended)
+
+Install with uv
+
+```bash
+
+uv tool install hashtray
+```
+
+Run hashtray with uv without installing it
+
+```bash
+uvx hashtray [arguments]
 ```
 
 ### pip
@@ -76,7 +106,7 @@ Pretty straightforward. The command is `email` .
 It converts the email address into its MD5 hash. _hashtray_ then checks if a public profile associated with the hash exists on Gravatar. If found, it displays the profile information.
 
 ```bash
-hashtray email user@domain.com
+hashtray email user@domain.tld
 ```
 
 In some cases, the email hash may not match the one found on the Gravatar profile, yet a profile is still displayed. This is because Gravatar profiles only show the hash of the primary email address. Consequently, the email address used for the search is not the primary one but is registered as a secondary email. This indicates that there is at least one more email address associated with the Gravatar account to be found.
