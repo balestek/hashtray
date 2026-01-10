@@ -1,6 +1,8 @@
 import hashlib
 import json
+import os
 import re
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 import tldextract
@@ -11,6 +13,33 @@ from tqdm import tqdm
 from hashtray.get_elements import GetElements
 from hashtray.get_gravatar import Gravatar
 from hashtray.permutator import Permute
+
+
+def _hash_one(email: str, hash_type: str) -> str:
+    email_bytes = email.lower().encode()
+    if hash_type == "MD5":
+        return hashlib.md5(email_bytes).hexdigest()
+    if hash_type == "SHA256":
+        return hashlib.sha256(email_bytes).hexdigest()
+    raise ValueError("Unsupported hash type")
+
+
+def _hash_batch(batch, target_hash, hash_type):
+    for email in batch:
+        if _hash_one(email, hash_type) == target_hash:
+            return email
+    return None
+
+
+def _batched(iterable, size):
+    batch = []
+    for item in iterable:
+        batch.append(item)
+        if len(batch) >= size:
+            yield batch
+            batch = []
+    if batch:
+        yield batch
 
 
 class Enumerator:
@@ -233,14 +262,40 @@ class Enumerator:
         enum_email_found = None
         # iterate over all permutations with progress bar
         progress = tqdm(total=self.combination_count, desc="Comparing email hashes", unit="it")
-        for email in permute.combinator():
-            hashed = self.hasher(email)
-            progress.update(1)
-            if hashed == self.account_hash:
-                # email matching the hash
-                enum_email_found = email
-                break
-        progress.close()
+        batch_size = 50000
+        max_workers = os.cpu_count() or 4
+        hasher_target = self.account_hash
+        hash_type = self.hash_type
+        futures = []
+        try:
+            with ProcessPoolExecutor(max_workers=max_workers) as executor:
+                for batch in _batched(permute.combinator(), batch_size):
+                    futures.append(
+                        executor.submit(_hash_batch, batch, hasher_target, hash_type)
+                    )
+                    progress.update(len(batch))
+
+                    if len(futures) >= max_workers * 4:
+                        for future in as_completed(futures):
+                            result = future.result()
+                            if result:
+                                enum_email_found = result
+                                executor.shutdown(cancel_futures=True)
+                                futures = []
+                                break
+                        if enum_email_found:
+                            break
+                        futures = [future for future in futures if not future.done()]
+
+                if not enum_email_found:
+                    for future in as_completed(futures):
+                        result = future.result()
+                        if result:
+                            enum_email_found = result
+                            executor.shutdown(cancel_futures=True)
+                            break
+        finally:
+            progress.close()
 
         # display results
         self.rich.print(f"\n[bold u turquoise2]RESULTS:")
